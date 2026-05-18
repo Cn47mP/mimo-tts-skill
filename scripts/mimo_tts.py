@@ -106,6 +106,8 @@ def main():
         print("--design: 使用 voicedesign 模型，通过文本描述设计音色", file=sys.stderr)
         print("--clone <audio_file>: 使用 voiceclone 模型，通过音频样本复刻音色", file=sys.stderr)
         print("[voice:描述]文本  → 自动识别音色描述/预置音色", file=sys.stderr)
+        print("\n环境变量：", file=sys.stderr)
+        print("  MIMO_TTS_DEFAULT_FORMAT: 默认输出格式 (wav/mp3/ogg/opus)", file=sys.stderr)
         print("\n音频标签示例：", file=sys.stderr)
         print("  (唱歌)原谅我这一生不羁放纵爱自由", file=sys.stderr)
         print("  (怅然)这么多年过去了，再走过那条街", file=sys.stderr)
@@ -187,13 +189,20 @@ def main():
     
     api_key = os.environ.get("XIAOMI_API_KEY", "")
     base_url = os.environ.get("XIAOMI_BASE_URL", "https://api.xiaomimimo.com/v1")
+    default_format = os.environ.get("MIMO_TTS_DEFAULT_FORMAT", "").lower()
 
     if not api_key:
         print("Error: XIAOMI_API_KEY not set", file=sys.stderr)
         sys.exit(1)
 
-    # Detect output format from extension
+    # Detect output format from extension or use default from environment
     ext = os.path.splitext(output_path)[1].lower()
+    
+    # If no extension, use default format from env or fall back to .wav
+    if not ext and default_format:
+        ext = f".{default_format}"
+        output_path = f"{output_path}{ext}"
+    
     fmt = {".wav": "wav", ".mp3": "mp3", ".ogg": "wav", ".opus": "wav"}.get(ext, "wav")
 
     # Build messages and audio config

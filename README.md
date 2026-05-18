@@ -108,6 +108,7 @@ tts:
 | `MIMO_TTS_VOICE` | ❌ | 自动检测 | 默认音色（冰糖/茉莉/苏打/白桦/Mia/Chloe/Milo/Dean） |
 | `MIMO_TTS_STYLE` | ❌ | — | 默认风格描述 |
 | `MIMO_TTS_MODEL` | ❌ | `mimo-v2.5-tts` | 默认模型 |
+| `MIMO_TTS_DEFAULT_FORMAT` | ❌ | — | 默认输出格式（wav/mp3/ogg/opus，当输出路径没有扩展名时使用） |
 
 ## 使用
 

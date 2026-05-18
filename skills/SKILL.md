@@ -338,6 +338,7 @@ python ~/AppData/Local/hermes/scripts/mimo_tts.py <output_path> <text> --clone <
 - `MIMO_TTS_VOICE`: 默认音色
 - `MIMO_TTS_STYLE`: 默认风格
 - `MIMO_TTS_MODEL`: 模型名（默认 mimo-v2.5-tts）
+- `MIMO_TTS_DEFAULT_FORMAT`: 默认输出格式（wav/mp3/ogg/opus，当输出路径没有扩展名时使用）
 
 ## 最佳实践
 
