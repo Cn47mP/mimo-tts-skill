@@ -70,11 +70,15 @@ def parse_voice_prefix(text):
     
     Returns (voice_desc_or_name, clean_text, is_design).
     """
-    # Match [voice: description] at start of text
-    m = re.match(r'^\[voice:\s*(.+?)\]\s*', text)
+    # Use re.search to find [voice: ...] even if it's not strictly at the beginning or is wrapped in ** **
+    m = re.search(r'\[voice:\s*(.+?)\]\s*', text)
     if m:
         desc = m.group(1).strip()
-        clean_text = text[m.end():]
+        # Remove the match from the text entirely
+        clean_text = text[:m.start()] + text[m.end():]
+        # Clean up any leftover markdown wrapping if the LLM hallucinated `**[voice:...]**`
+        clean_text = re.sub(r'^\s*\*\*\s*\*\*\s*', '', clean_text).strip()
+
         # Check if it's a known preset voice name
         if desc.lower() in VOICES:
             return VOICES[desc.lower()], clean_text, False
