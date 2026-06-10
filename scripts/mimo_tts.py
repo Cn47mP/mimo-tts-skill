@@ -214,17 +214,16 @@ def main():
     audio_config = {}
     
     if use_clone and clone_audio_file:
-        # VoiceClone mode: user message contains base64 audio + optional style
+        # VoiceClone mode: audio payload in audio.voice, optional style in user message
         audio_data_uri = encode_audio_file(clone_audio_file)
-        user_content = {"audio": audio_data_uri}
         if style:
-            user_content["text"] = style
-        messages = [
-            {"role": "user", "content": user_content}
-        ]
+            messages.append({"role": "user", "content": style})
+        else:
+            # According to docs user message can be an empty string for clone
+            messages.append({"role": "user", "content": ""})
         if text:
             messages.append({"role": "assistant", "content": text})
-        audio_config = {"format": fmt, "optimize_text_preview": True}
+        audio_config = {"format": fmt, "voice": audio_data_uri}
     elif use_design:
         # VoiceDesign mode: user message describes the voice (required), assistant message is the text
         voice_desc = style if style else "用温柔甜美的年轻女性声音说话"
@@ -239,8 +238,7 @@ def main():
         # Standard mode: style goes to user, text goes to assistant
         if style:
             messages.append({"role": "user", "content": style})
-        else:
-            messages.append({"role": "user", "content": "请朗读"})
+        # If no style, omit user message entirely instead of passing empty string
         messages.append({"role": "assistant", "content": text})
         audio_config = {"format": fmt, "voice": voice}
 
