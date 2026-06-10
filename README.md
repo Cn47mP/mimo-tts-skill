@@ -41,9 +41,16 @@
 | 变量 | 必需 | 说明 |
 |------|------|------|
 | `XIAOMI_API_KEY` | ✅ | MiMo API 密钥 |
-| `XIAOMI_BASE_URL` | ❌ | 自定义 API 端点 |
+| `XIAOMI_BASE_URL` | ❌ | 自定义 API 端点。Token Plan 用户请参考下方的集群配置 |
 | `MIMO_TTS_VOICE` | ❌ | 默认音色 |
 | `MIMO_TTS_DEFAULT_FORMAT` | ❌ | 默认输出格式 |
+
+### Token Plan 集群端点
+
+如果您使用的是 MiMo Token Plan，请根据您所在的集群，将 `XIAOMI_BASE_URL` 设置为对应的端点：
+- 中国集群：`https://token-plan-cn.xiaomimimo.com/v1`
+- 新加坡集群：`https://token-plan-sgp.xiaomimimo.com/v1`
+- 欧洲集群：`https://token-plan-ams.xiaomimimo.com/v1`
 
 ## 依赖
 

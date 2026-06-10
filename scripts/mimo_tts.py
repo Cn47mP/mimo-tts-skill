@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""MiMo TTS wrapper - converts text to speech using Xiaomi MiMo API.
+"""MiMo TTS 包装器 - 使用小米 MiMo API 将文本转换为语音。
 
-Supports:
-- Voice selection: mimo_default, 冰糖, 茉莉, 苏打, 白桦, Mia, Chloe, Milo, Dean
+支持：
+- 音色选择: mimo_default, 冰糖, 茉莉, 苏打, 白桦, Mia, Chloe, Milo, Dean
 - VoiceDesign: 通过文本描述设计音色
 - VoiceClone: 通过音频样本复刻音色
-- Style control via user message
-- Audio tag control (singing, emotions, dialects, etc.)
-- Auto language detection for voice selection
+- 通过用户消息控制风格
+- 音频标签控制（唱歌、情绪、方言等）
+- 自动检测语言以选择音色
 
-Output: writes audio to {output_path}, prints the path to stdout.
+输出：将音频写入 {输出路径}，将路径打印到标准输出。
 """
 import sys, os, json, base64, urllib.request, re, subprocess, tempfile
 
@@ -60,15 +60,15 @@ def load_env_file():
             break
 
 def parse_voice_prefix(text):
-    """Parse voice description from text using [voice: ...] prefix syntax.
+    """使用 [voice: ...] 前缀语法解析文本中的音色描述。
     
-    Supports:
-      [voice: 描述]要说的话        → voicedesign mode
-      [voice:冰糖]要说的话         → preset voice (no space after colon)
-      [voice:mia]要说的话          → preset voice (english)
-      要说的话                     → no prefix, auto mode
+    支持:
+      [voice: 描述]要说的话        → voicedesign 模式
+      [voice:冰糖]要说的话         → 预置音色 (冒号后无空格)
+      [voice:mia]要说的话          → 预置音色 (英文)
+      要说的话                     → 无前缀，自动模式
     
-    Returns (voice_desc_or_name, clean_text, is_design).
+    返回 (音色描述或名称, 清理后的文本, 是否为设计模式)。
     """
     # Use re.search to find [voice: ...] even if it's not strictly at the beginning or is wrapped in ** **
     m = re.search(r'\[voice:\s*(.+?)\]\s*', text)
@@ -105,10 +105,10 @@ def main():
     load_env_file()
     
     if len(sys.argv) < 3:
-        print("Usage: mimo_tts.py <output_path> <text> [voice/style] [--design] [--clone <audio_file>]", file=sys.stderr)
-        print("Voices: mimo_default, 冰糖, 茉莉, 苏打, 白桦, Mia, Chloe, Milo, Dean", file=sys.stderr)
+        print("用法: mimo_tts.py <输出路径> <文本> [音色/风格] [--design] [--clone <音频文件>]", file=sys.stderr)
+        print("可用音色: mimo_default, 冰糖, 茉莉, 苏打, 白桦, Mia, Chloe, Milo, Dean", file=sys.stderr)
         print("--design: 使用 voicedesign 模型，通过文本描述设计音色", file=sys.stderr)
-        print("--clone <audio_file>: 使用 voiceclone 模型，通过音频样本复刻音色", file=sys.stderr)
+        print("--clone <音频文件>: 使用 voiceclone 模型，通过音频样本复刻音色", file=sys.stderr)
         print("[voice:描述]文本  → 自动识别音色描述/预置音色", file=sys.stderr)
         print("\n环境变量：", file=sys.stderr)
         print("  MIMO_TTS_DEFAULT_FORMAT: 默认输出格式 (wav/mp3/ogg/opus)", file=sys.stderr)
@@ -214,17 +214,16 @@ def main():
     audio_config = {}
     
     if use_clone and clone_audio_file:
-        # VoiceClone mode: user message contains base64 audio + optional style
+        # VoiceClone mode: audio payload in audio.voice, optional style in user message
         audio_data_uri = encode_audio_file(clone_audio_file)
-        user_content = {"audio": audio_data_uri}
         if style:
-            user_content["text"] = style
-        messages = [
-            {"role": "user", "content": user_content}
-        ]
+            messages.append({"role": "user", "content": style})
+        else:
+            # According to docs user message can be an empty string for clone
+            messages.append({"role": "user", "content": ""})
         if text:
             messages.append({"role": "assistant", "content": text})
-        audio_config = {"format": fmt, "optimize_text_preview": True}
+        audio_config = {"format": fmt, "voice": audio_data_uri}
     elif use_design:
         # VoiceDesign mode: user message describes the voice (required), assistant message is the text
         voice_desc = style if style else "用温柔甜美的年轻女性声音说话"
@@ -239,8 +238,7 @@ def main():
         # Standard mode: style goes to user, text goes to assistant
         if style:
             messages.append({"role": "user", "content": style})
-        else:
-            messages.append({"role": "user", "content": "请朗读"})
+        # If no style, omit user message entirely instead of passing empty string
         messages.append({"role": "assistant", "content": text})
         audio_config = {"format": fmt, "voice": voice}
 
